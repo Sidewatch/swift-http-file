@@ -1,0 +1,15 @@
+{
+  "originHash" : "ce1134e041be0d10d95c81b7fb8baba2961ebaee9ad1f0826db25be0ccc52567",
+  "pins" : [
+    {
+      "identity" : "swift-curl-parse",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/arraypress/swift-curl-parse.git",
+      "state" : {
+        "revision" : "52562f66ccdc441fd1ca1db543db12168eb77c47",
+        "version" : "1.0.0"
+      }
+    }
+  ],
+  "version" : 3
+}
