@@ -26,7 +26,8 @@ public enum HTTPFile {
         }
         var start = caretLine
         while start > 0, !lines[start].hasPrefix("###") { start -= 1 }
-        let name: String? = lines[start].hasPrefix("###")
+        let name: String? =
+            lines[start].hasPrefix("###")
             ? String(lines[start].dropFirst(3)).trimmingCharacters(in: .whitespaces) : nil
         var end = caretLine + 1
         while end < lines.count, !lines[end].hasPrefix("###") { end += 1 }
@@ -43,13 +44,16 @@ public enum HTTPFile {
         var headers: [HTTPFileHeader] = []
         while i < block.count, !block[i].trimmingCharacters(in: .whitespaces).isEmpty {
             if let colon = block[i].firstIndex(of: ":") {
-                headers.append(HTTPFileHeader(name: String(block[i][..<colon]).trimmingCharacters(in: .whitespaces),
-                                              value: String(block[i][block[i].index(after: colon)...]).trimmingCharacters(in: .whitespaces)))
+                headers.append(
+                    HTTPFileHeader(
+                        name: String(block[i][..<colon]).trimmingCharacters(in: .whitespaces),
+                        value: String(block[i][block[i].index(after: colon)...]).trimmingCharacters(in: .whitespaces)))
             }
             i += 1
         }
         let body = block[min(i + 1, block.count)...].joined(separator: "\n").trimmingCharacters(in: .whitespacesAndNewlines)
-        return HTTPFileRequest(name: name?.isEmpty == true ? nil : name, method: requestLine[0].uppercased(),
-                               url: url, headers: headers, body: body)
+        return HTTPFileRequest(
+            name: name?.isEmpty == true ? nil : name, method: requestLine[0].uppercased(),
+            url: url, headers: headers, body: body)
     }
 }

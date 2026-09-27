@@ -38,9 +38,10 @@ public extension HTTPFileRequest {
         var body = curl.body ?? ""
         if !curl.formFields.isEmpty {
             add("Content-Type", "multipart/form-data; boundary=\(Self.formBoundary)")
-            body = curl.formFields.map {
-                "--\(Self.formBoundary)\nContent-Disposition: form-data; name=\"\($0.name)\"\n\n\($0.value)"
-            }.joined(separator: "\n") + "\n--\(Self.formBoundary)--"
+            body =
+                curl.formFields.map {
+                    "--\(Self.formBoundary)\nContent-Disposition: form-data; name=\"\($0.name)\"\n\n\($0.value)"
+                }.joined(separator: "\n") + "\n--\(Self.formBoundary)--"
         }
         let bare = url.components(separatedBy: "://").last?.components(separatedBy: "?").first ?? url
         self.init(name: "\(curl.method) \(bare)", method: curl.method, url: url, headers: headers, body: body)

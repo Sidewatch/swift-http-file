@@ -13,17 +13,17 @@ import XCTest
 
 final class HTTPFileTests: XCTestCase {
     private let document = """
-    ### Cat fact
-    GET https://catfact.ninja/fact
+        ### Cat fact
+        GET https://catfact.ninja/fact
 
-    ### POST some JSON
-    # a comment before the request line
-    POST https://httpbin.org/post
-    Content-Type: application/json
-    X-Trace: a:b
+        ### POST some JSON
+        # a comment before the request line
+        POST https://httpbin.org/post
+        Content-Type: application/json
+        X-Trace: a:b
 
-    { "hello": "world" }
-    """
+        { "hello": "world" }
+        """
 
     func testTheRequestIsTheBlockTheCaretIsIn() throws {
         let first = try XCTUnwrap(HTTPFile.request(atOffset: 3, in: document))
@@ -32,8 +32,12 @@ final class HTTPFileTests: XCTestCase {
         let second = try XCTUnwrap(HTTPFile.request(atOffset: caret, in: document))
         XCTAssertEqual(second.name, "POST some JSON")
         XCTAssertEqual(second.method, "POST")
-        XCTAssertEqual(second.headers, [HTTPFileHeader(name: "Content-Type", value: "application/json"),
-                                        HTTPFileHeader(name: "X-Trace", value: "a:b")], "a value keeps its own colons")
+        XCTAssertEqual(
+            second.headers,
+            [
+                HTTPFileHeader(name: "Content-Type", value: "application/json"),
+                HTTPFileHeader(name: "X-Trace", value: "a:b"),
+            ], "a value keeps its own colons")
         XCTAssertEqual(second.body, #"{ "hello": "world" }"#)
     }
 
@@ -54,21 +58,27 @@ final class HTTPFileTests: XCTestCase {
     func testACurlCommandBecomesARequest() throws {
         let command = #"curl -X POST 'https://api.example.com/v1/users?page=2' -H 'Content-Type: application/json' -d '{"name":"Ada"}'"#
         let request = try XCTUnwrap(HTTPFileRequest(curl: command))
-        XCTAssertEqual(request.text, """
-        ### POST api.example.com/v1/users
-        POST https://api.example.com/v1/users?page=2
-        Content-Type: application/json
+        XCTAssertEqual(
+            request.text,
+            """
+            ### POST api.example.com/v1/users
+            POST https://api.example.com/v1/users?page=2
+            Content-Type: application/json
 
-        {"name":"Ada"}
-        """)
+            {"name":"Ada"}
+            """)
     }
 
     func testCurlsImplicitHeadersBecomeExplicit() throws {
         let request = try XCTUnwrap(HTTPFileRequest(curl: "curl -u sk_test_123: -A probe/1 -b 'a=1' example.com/ping"))
         XCTAssertEqual(request.url, "http://example.com/ping", "curl's default scheme")
-        XCTAssertEqual(request.headers, [HTTPFileHeader(name: "Authorization", value: "Basic " + Data("sk_test_123:".utf8).base64EncodedString()),
-                                         HTTPFileHeader(name: "User-Agent", value: "probe/1"),
-                                         HTTPFileHeader(name: "Cookie", value: "a=1")])
+        XCTAssertEqual(
+            request.headers,
+            [
+                HTTPFileHeader(name: "Authorization", value: "Basic " + Data("sk_test_123:".utf8).base64EncodedString()),
+                HTTPFileHeader(name: "User-Agent", value: "probe/1"),
+                HTTPFileHeader(name: "Cookie", value: "a=1"),
+            ])
         let own = try XCTUnwrap(HTTPFileRequest(curl: "curl -A probe/1 -H 'user-agent: mine' https://a.test"))
         XCTAssertEqual(own.headers, [HTTPFileHeader(name: "user-agent", value: "mine")], "a header the command set wins")
     }
@@ -78,7 +88,10 @@ final class HTTPFileTests: XCTestCase {
         let b = HTTPFileRequest.formBoundary
         XCTAssertEqual(request.method, "POST")
         XCTAssertEqual(request.headers, [HTTPFileHeader(name: "Content-Type", value: "multipart/form-data; boundary=\(b)")])
-        XCTAssertEqual(request.body, "--\(b)\nContent-Disposition: form-data; name=\"name\"\n\nAda\n--\(b)\nContent-Disposition: form-data; name=\"photo\"\n\n@me.jpg\n--\(b)--")
+        XCTAssertEqual(
+            request.body,
+            "--\(b)\nContent-Disposition: form-data; name=\"name\"\n\nAda\n--\(b)\nContent-Disposition: form-data; name=\"photo\"\n\n@me.jpg\n--\(b)--"
+        )
     }
 
     func testTextThatIsNotCurlIsNoRequest() {
