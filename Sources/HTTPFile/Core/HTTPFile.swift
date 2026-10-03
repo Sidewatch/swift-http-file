@@ -36,9 +36,12 @@ public enum HTTPFile {
         var i = 0
         while i < block.count, block[i].trimmingCharacters(in: .whitespaces).isEmpty || block[i].hasPrefix("#") { i += 1 }
         guard i < block.count else { return nil }
-        let requestLine = block[i].split(separator: " ", maxSplits: 1).map(String.init)
+        // `METHOD URL` with an optional trailing `HTTP/1.1` (the form JetBrains and VS Code's REST
+        // Client both write), which is the protocol version, not part of the address.
+        var requestLine = block[i].split(separator: " ", omittingEmptySubsequences: true).map(String.init)
+        if requestLine.count == 3, requestLine[2].uppercased().hasPrefix("HTTP/") { requestLine.removeLast() }
         guard requestLine.count == 2 else { return nil }
-        let url = requestLine[1].trimmingCharacters(in: .whitespaces)
+        let url = requestLine[1]
         guard URL(string: url)?.scheme != nil else { return nil }
         i += 1
         var headers: [HTTPFileHeader] = []

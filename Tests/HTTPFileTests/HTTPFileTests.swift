@@ -41,6 +41,14 @@ final class HTTPFileTests: XCTestCase {
         XCTAssertEqual(second.body, #"{ "hello": "world" }"#)
     }
 
+    func testTheProtocolVersionIsNotPartOfTheAddress() throws {
+        let text = "### Versioned\nget https://api.example.com/items?page=2 HTTP/1.1\nAccept: application/json\n"
+        let request = try XCTUnwrap(HTTPFile.request(atOffset: 20, in: text))
+        XCTAssertEqual(request.method, "GET")
+        XCTAssertEqual(request.url, "https://api.example.com/items?page=2")
+        XCTAssertEqual(request.headers.first?.name, "Accept")
+    }
+
     func testABlockWithoutAnAddressIsNoRequest() {
         XCTAssertNil(HTTPFile.request(atOffset: 0, in: "### Empty\n# only a comment"))
         XCTAssertNil(HTTPFile.request(atOffset: 0, in: "GET not-a-url"), "an address needs a scheme")
