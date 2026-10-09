@@ -7,6 +7,7 @@ Reads and writes `.http` requests — the plain-text format VS Code's REST Clien
 - 📄 **Requests from a document** — `HTTPFile.request(atOffset:in:)` answers the request in the `###` block the caret is in
 - ✍️ **Round trip** — `HTTPFileRequest.text` writes a request back as the same block
 - 🌀 **curl in, request out** — `HTTPFileRequest(curl:)`: `-u` → `Authorization: Basic`, `-A` → `User-Agent`, `-b` → `Cookie`, `-F` → a `multipart/form-data` body; a header the command already set wins
+- 🔐 **Redirects keep credentials home** — `RedirectPolicy.headers(for:from:to:)` answers the headers that may follow a request to the address a `3xx` names: when the host, scheme or port changes, `Authorization`, `Cookie`, `Proxy-Authorization` and any header whose name holds `key`, `token`, `secret` or `auth` are dropped (Foundation strips `Authorization` alone); `isCredentialShaped(_:)` is the same test for a client about to save a request in plain text
 - 🪶 **One dependency** — [swift-curl-parse](https://github.com/arraypress/swift-curl-parse), for the curl parsing
 
 ## Requirements
@@ -39,6 +40,9 @@ if let pasted = HTTPFileRequest(curl: "curl -u sk_test_123: https://api.stripe.c
     // GET https://api.stripe.com/v1/charges
     // Authorization: Basic c2tfdGVzdF8xMjM6
 }
+
+// In a URLSession redirect delegate: the headers that may follow a 302 to another host.
+let kept = RedirectPolicy.headers(for: request.allHTTPHeaderFields ?? [:], from: request.url!, to: redirect.url!)
 ```
 
 ## For agents
