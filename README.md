@@ -43,6 +43,10 @@ if let pasted = HTTPFileRequest(curl: "curl -u sk_test_123: https://api.stripe.c
 
 // In a URLSession redirect delegate: the headers that may follow a 302 to another host.
 let kept = RedirectPolicy.headers(for: request.allHTTPHeaderFields ?? [:], from: request.url!, to: redirect.url!)
+
+// Or use the delegate that applies it: an ephemeral session whose redirects never carry a
+// credential-shaped header off its origin.
+let session = HTTPRedirectGuard.makeSession()
 ```
 
 ## For agents
