@@ -49,6 +49,11 @@ let kept = RedirectPolicy.headers(for: request.allHTTPHeaderFields ?? [:], from:
 let session = HTTPRedirectGuard.makeSession()
 ```
 
+```swift
+// A request block, ready to send: every header (a repeated name too), no body on GET or HEAD.
+if let request = HTTPFile.request(atOffset: caret, in: text)?.urlRequest { URLSession.shared.dataTask(with: request).resume() }
+```
+
 ## For agents
 
 Read `CONTRIBUTING.md` first: the folder layout and the PR rules. `swift test` is the whole
